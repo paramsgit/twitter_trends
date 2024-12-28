@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Runner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        tailwind.config = {
+          darkMode: 'class', // Enable dark mode using the 'class' strategy
+          theme: {
+            extend: {},
+          },
+        };
+      </script>
+    <style>
+       .hide_scrollbar {
+         overflow: -moz-scrollbars-none; /* Firefox */
+         -ms-overflow-style: none; /* Internet Explorer and Edge */ 
+         scrollbar-width: none; /* Firefox */ } 
+       .hide_scrollbar::-webkit-scrollbar {
+         display: none; }
+
+         .loader {
+            width: 8px;
+            height: 8px;
+            margin-left: 1rem;
+            border-radius: 50%;
+            background-color: #fff;
+            box-shadow: 14px 0 #fff, -14px 0 #fff;
+            position: relative;
+            animation: flash 0.5s ease-out infinite alternate;
+            }
+
+            @keyframes flash {
+            0% {
+                background-color: #FFF2;
+                box-shadow: 14px 0 #FFF2, -14px 0 #FFF;
+            }
+            50% {
+                background-color: #FFF;
+                box-shadow: 14px 0 #FFF2, -14px 0 #FFF2;
+            }
+            100% {
+                background-color: #FFF2;
+                box-shadow: 14px 0 #FFF, -14px 0 #FFF2;
+            }
+            }
+      
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 w-full">
+    
+    <section class="bg-white dark:bg-gray-900 w-full">
+        <nav  class=" bg-white dark:bg-gray-900 p-6 flex justify-between items-center fixed top-0 w-screen">
+            <div class="flex items-center justify-between">
+                <a href="#">
+                    <!-- <img class="w-auto h-6 sm:h-7" src="https://merakiui.com/images/full-logo.svg" alt=""> -->
+                    <svg class="w-[35px]" viewBox="0 0 126.24 102.59" xmlns="http://www.w3.org/2000/svg"><path d="m40.58 115.3c47.64 0 73.69-39.47 73.69-73.69 0-1.12 0-2.24-.07-3.35a52.7 52.7 0 0 0 12.92-13.41 51.7 51.7 0 0 1 -14.87 4.08 26 26 0 0 0 11.38-14.33 51.9 51.9 0 0 1 -16.45 6.29 25.92 25.92 0 0 0 -44.13 23.62 73.53 73.53 0 0 1 -53.38-27.06 25.92 25.92 0 0 0 8 34.58 25.71 25.71 0 0 1 -11.67-3.25v.33a25.91 25.91 0 0 0 20.73 25.39 25.86 25.86 0 0 1 -11.7.44 25.93 25.93 0 0 0 24.2 18 52 52 0 0 1 -32.17 11.06 52.72 52.72 0 0 1 -6.18-.36 73.32 73.32 0 0 0 39.7 11.63" fill="#1da1f2" transform="translate(-.88 -12.7)"/></svg>
+                </a>
+
+            </div>
+    
+            <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
+             <div class="flex items-center">
+          
+              <label class="inline-flex items-center cursor-pointer px-2 md:px-4 py-2 me-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 ">
+                <input id="theme-toggle" type="checkbox" value="" class="sr-only peer">
+                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 hidden sm:block" id="toggleText">Dark</span>
+              </label>
+              <a href="https://github.com/paramsgit/twitter_trends" target="_blank" class="rounded-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium text-sm px-2 md:px-4 py-2 me-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 flex items-center">
+                <svg class="w-6 h-6 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="hidden md:block ml-2">Github</span>
+                </a>
+
+            </div>
+            </div>
+        </nav>
+    
+        <div class="container px-6 py-16 mx-auto text-center mt-[5rem]">
+            <div class="max-w-lg mx-auto">
+                <h1 class="text-3xl font-semibold text-gray-800 dark:text-white lg:text-4xl">
+                    Fetch Trending Twitter Topics</h1>
+                <p class="mt-6 text-gray-500 dark:text-gray-300">
+                    The button sends request to the flask server, server runs the script in the background and updates the webpage with the progress or results.
+                </p>
+                <button id="run_btn" class="run_btn px-5 md:px-8 py-2 mt-6 text-sm font-medium leading-5 text-center text-white capitalize bg-blue-600 rounded-lg hover:bg-blue-500 lg:mx-0 lg:w-auto focus:outline-none">
+                    Start the script
+                </button>
+                <div class="mt-3 text-sm text-gray-400 flex items-center justify-center">
+                    <input type="checkbox" class="mr-2" id="gui" />
+                    Click to view GUI</div>
+            </div>
+    
+            <div class="flex flex-col items-center justify-center mt-10">
+                <!-- <img class="object-cover w-full h-96 rounded-xl lg:w-4/5" src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80" /> -->
+                <!-- Mockup -->
+                <div class="flex w-full max-w-xl flex-col  overflow-auto bg-gray-950 rounded-2xl text-gray-200 font-mono">
+                    <!-- Top bar -->
+                    <div class="flex items-center h-10 px-4 bg-gray-800 rounded-t-2xl">
+                        <div class="h-3 w-3 mr-2 rounded-full bg-red-500"></div>
+                        <div class="h-3 w-3 mr-2 rounded-full bg-yellow-500"></div>
+                        <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                    </div>
+                
+                    <!-- CMD body -->
+                    <div id="terminal_container" class="flex-1 p-4 min-h-[18rem] max-h-[18rem] hide_scrollbar overflow-auto">
+                        <div class="flex">
+                            <div class="mr-2">&gt;</div>
+                            <p class="" >Your logs will console here</p>
+                        </div>
+                        <div class="mt-2 flex flex-col space-y-1 items-start text-gray-100" id="log-container"> 
+                        </div>
+                        <div class="flex justify-start items-center w-full hidden" id="loader_div">
+                            <div class="mr-2">&gt;</div>
+                            <span class="loader"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-6 flex w-full max-w-xl flex-col items-center overflow-auto bg-gray-50 rounded-2xl text-gray-200 font-mono bg-gray-200 dark:bg-gray-800 p-8 hidden" id="result_div">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 dark:text-white hover:text-gray-600 dark:hover:text-gray-200 font-sans">Trending topics</h1>
+                    <div class="py-6  flex justify-center w-full">
+                    <ul class="min-w-48 max-w-lg text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" id="result_list" >
+                <li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">Profile</li>
+                <li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600">Settings</li>
+                <li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600">df df  df  bgsg sages</li>
+                <li class="w-full px-4 py-2 rounded-b-lg">Download</li>
+                    </ul>
+                </div>
+                    <div id="ip_address" class="mb-4 bg-white dark:bg-gray-900 text-gray-800 dark:text-white px-5 py-2 rounded-full">
+                        IP: 101.450.789.356
+                    </div>
+                    <div id="try_again" class="run_btn mb-4 underline cursor-pointer text-blue-700">
+                        Try again
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="h-[10rem]"></div>   
+    </section>
+   
+    <!-- <button id="run-script-btn">Run Script</button>
+    <h2>Logs</h2> -->
+    <!-- <div class="log" id="log-container"></div> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const socket = io.connect('http://127.0.0.1:5000'); // Update with your Flask server URL if needed
+        const logContainer = document.getElementById('log-container');
+        const terminal_container = document.getElementById('terminal_container');
+        const loader_div = document.getElementById('loader_div');
+        const result_div = document.getElementById('result_div');
+        const result_list = document.getElementById('result_list');
+        const gui = document.getElementById('gui');
+        const ip_address = document.getElementById('ip_address');
+        const run_buttons = document.querySelectorAll('.run_btn');
+        const body = document.body;
+
+        // Function to append log messages to the log container
+        function addLog(message,mode="normal") {
+            const log = document.createElement('p');
+            log.classList.add(mode === "error" ? "text-red-600" : mode === "success" ? "text-green-600" : "text-gray-300")
+            log.textContent = "> ";
+            log.textContent = log.textContent+message;
+            logContainer.appendChild(log);
+            terminal_container.scrollTop = terminal_container.scrollHeight; // Scroll to the bottom
+        }
+        function Run_Script(){
+            window.scrollTo({top:280,behavior: 'smooth'});
+            loader_div.classList.remove("hidden")
+            result_list.innerHTML=""
+            ip_address.innerHTML=""
+            result_div.classList.add("hidden")
+            socket.emit('run_script',gui.checked); 
+        
+        }
+
+        // Handle button click
+        run_buttons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            Run_Script(event);
+        });
+        });
+
+        // Listen for notifications from the server
+        socket.on('notification', (data) => {
+            addLog(data.message);
+        });
+
+        // Listen for script completion
+        socket.on('script_complete', (data) => {
+            addLog("Script completed successfully!","success");
+            console.log(data)
+            loader_div.classList.add("hidden")
+
+            if(data?.data?.trends?.length!=0){
+                const trends=data?.data?.trends;
+                trends.forEach((trend,index) => {
+                    result_list.innerHTML +=
+                     (index === 0) ? `<li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">${trend}</li>` 
+                     : (index === trends.length - 1) ? `<li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600">${trend}</li>`
+                     :`<li class="w-full px-4 py-2 rounded-b-lg">${trend}</li>`
+                });
+                
+            }else{
+                result_list.innerHTML=`<li class="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600 rounded-lg">No Item found</li>
+                `
+            }
+            if(data?.data?.ip_address){
+                ip_address.innerText="IP: "+data.data.ip_address;
+            }else{
+                ip_address.innerText="Not found";
+
+            }
+            result_div.classList.remove("hidden")
+
+        });
+
+        // Listen for errors
+        socket.on('error', (data) => {
+            addLog(`Error: ${data.message}`,"error");
+            loader_div.classList.add("hidden")
+
+        });
+
+
+        // script.js
+        const toggleButton = document.getElementById('theme-toggle');
+
+        // Check for saved theme in localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark');
+        toggleButton.checked = true;
+        }
+
+        // Toggle dark mode
+        toggleButton.addEventListener('change', () => {
+        body.classList.toggle('dark');
+        // Save the current theme in localStorage
+        if (body.classList.contains('dark')) {
+            localStorage.setItem('theme', 'dark');
+        } else {
+            localStorage.setItem('theme', 'light');
+        }
+        });
+
+    })
+
+    </script>
+</body>
+</html>
